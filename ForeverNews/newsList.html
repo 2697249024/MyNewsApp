@@ -1,0 +1,116 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>新闻列表</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+		 <script src="js/mui.min.js"></script>
+		<script type="text/javascript" src="js/jquery.js" ></script>
+		<!--
+        	作者：2697249024@qq.com
+        	时间：2019-02-14
+        	描述：引入template引擎模板
+        -->
+        <script type="text/javascript" src="js/template-web.js" ></script>
+	</head>
+	<body>
+		
+		
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">新闻列表</h1>
+		</header>
+		
+        <div class="mui-content" id="content">
+        		
+        </div>
+	</body>
+	  	<script id="test" type="text/html">
+		   <div>
+		   		<ul class="mui-table-view" id="news">
+				   {{each contentlist}}
+				   		{{if $value.nid!=null}}
+					    <li class="mui-table-view-cell mui-media" id="{{$value.id}}">
+	             			 <a href="javascript:;">
+						    	 {{if $value.imageurls[$index]!=null}}
+						    	 <img class="mui-media-object mui-pull-right" src="{{$value.imageurls[$index].url}}"/>
+						    	 {{/if}}
+						    	 <p class="mui-ellipsis">{{$value.title}}</p>
+						    	 <p>id：{{$value.id}}</p>
+	             			 </a>
+					    </li>
+					    {{/if}}
+				    {{/each}}
+			    </ul>
+		    </div>
+		</script>
+		<script type="text/javascript">
+			//初始化预加载详情页面
+			mui.init({
+				 preloadPages:[{
+				    id:'newsDetails.html',
+				    url:'newsDetails.html'           
+				  }
+				  ]
+			});
+			//获取mian列表数据
+			mui.plusReady(function(){
+				
+				//发送ajax请求调用远程api
+					mui.ajax('http://route.showapi.com/109-35?showapi_appid=86960&showapi_sign=6ba3285179454971baf55d6697b7f382',{
+							data:{
+							channelId:'5572a108b3cdc86cf39001cd',
+							needHtml:1//是否需要返回正文的html格式，1为需要，其他为不需要
+							},
+							dataType:'json',//服务器返回json格式数据
+							type:'get',//HTTP请求类型
+							timeout:10000,//超时时间设置为10秒；
+							headers:{'Content-Type':'application/json'},		              
+							success:function(data){
+								//服务器返回响应，根据响应结果，分析是否登录成功；
+								//console.log(data);
+								var pagebean= data.showapi_res_body.pagebean;//消息体的JSON封装，所有应用级的返回参数将嵌入此对象
+								console.log("是否响应成功："+data.showapi_res_body.ret_code);//成功为0，其他失败
+								console.log("theBodyList.title："+pagebean.contentlist[0].title);
+								console.log("pagebean.allPages："+pagebean.allPages);
+								console.log("link："+pagebean.contentlist[0].link);
+								//console.log(data.showapi_res_body.pagebean.allPages);//所有页数
+								//var theTitle = data.showapi_res_body.pagebean.contentlist[0].title;新闻标题 
+								var html = template("test",pagebean);
+								//console.log(html);
+								document.getElementById('content').innerHTML = html;
+								
+							},
+							error:function(xhr,type,errorThrown){
+								//异常处理；
+								console.log(type);
+								mui.alert("网络异常！");
+							}
+					});
+				
+			});
+			
+			var detailPage = null;
+			//添加列表项的点击事件
+			mui('.mui-content').on('tap', 'li', function(e) {
+				//alert("点击了LI");
+			  var id = this.getAttribute('id');
+			  console.log("id:"+id);
+			   //获得详情页面
+			  if(!detailPage){
+			    detailPage = plus.webview.getWebviewById('newsDetails.html');
+			  }
+			   //触发详情页面的newsId事件
+			  mui.fire(detailPage,'newsId',{
+			    id:id
+			  });
+			//打开详情页面          
+			  mui.openWindow({
+			    id:'newsDetails.html'
+			  });
+			});  
+			
+		</script>
+</html>
