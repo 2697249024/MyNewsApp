@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>详情</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<script type="text/javascript" src="js/template-web.js" ></script>
+		<script type="text/javascript" src="js/jquery.js" ></script>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">标题</h1>
+		</header>
+		<!--主题 -->
+		<div class="mui-content" id="content">
+		</div>
+		<script src="js/mui.min.js"></script>
+		<script type="text/javascript">
+			mui.init();
+			//添加newId自定义事件监听
+			window.addEventListener('newsId',function(event){
+			  //获得事件参数
+			  var id1 = event.detail.id;
+			  console.log("id"+id1);
+			  var url="http://route.showapi.com/109-35?showapi_appid=86960&showapi_sign=6ba3285179454971baf55d6697b7f382&needHtml=1&needContent=1&id="+id1;
+			  console.log(url);
+			  //根据id向服务器请求新闻详情
+			  //获取mian列表数据
+			mui.plusReady(function(){
+				//发送ajax请求调用远程api
+					mui.ajax(url,{
+							dataType:'json',//服务器返回json格式数据
+							type:'get',//HTTP请求类型
+							timeout:10000,//超时时间设置为10秒；
+							headers:{'Content-Type':'application/json'},		              
+							success:function(data){
+								//服务器返回响应，根据响应结果，分析是否登录成功；
+								//console.log(data);
+								var contentlist1= data.showapi_res_body.pagebean.contentlist[0];//消息体的JSON封装，所有应用级的返回参数将嵌入此对象
+								//var jsonText = JSON.stringify(contentlist1);
+							    //console.log(jsonText); 
+								//console.log("是否响应成功："+data.showapi_res_body.ret_code);//成功为0，其他失败
+								//console.log("contentlist1.html新闻正文："+contentlist1.html);//新闻正文
+								//console.log(html);
+								//文章标题
+								$(".mui-title").html(contentlist1.title);
+								//主题内容
+								document.getElementById('content').innerHTML = contentlist1.html;
+							},
+							error:function(xhr,type,errorThrown){
+								//异常处理；
+								console.log(type);
+								mui.alert("网络异常！");
+							}
+					});
+				
+				});
+			  
+			});
+			
+		</script>
+		
+	</body>
+
+</html>
